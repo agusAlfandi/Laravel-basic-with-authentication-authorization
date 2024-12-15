@@ -12,15 +12,12 @@ class UserController extends Controller
   {
     // $users = User::with('phone')->get();
     $users = User::with('image')->get();
-    // return $users;
     return view('Auth/users', compact('users'));
   }
 
   function phones()
   {
-    // $phones = Phone::all();
     $phones = Phone::with('user')->get();
     return $phones;
-    // return $this->belongsTo(User::class, 'user_id');
   }
 }

@@ -28,14 +28,8 @@
       <div class="flex flex-col items-end w-full">
         <p>Created At: {{ $blog->created_at->format('d F Y H:i') }}</p>
         <p>
-          {{--
-            @if ($blogh->author == null)
-            -
-            @else
-          --}}
           By:
           {{ $blog->author->name ?? 'User' }}
-          {{-- @endif --}}
         </p>
       </div>
 

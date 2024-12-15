@@ -16,17 +16,12 @@ class BlogController extends Controller
   {
     $title = $request->title;
 
-    if ($request->user()->cannot('viewAny', Blog::class)) {
-      return abort(403, 'You do not own this blog.');
-    }
-    // Gate::authorize('viewAny', Blog::class);
+    Gate::authorize('viewAny', Blog::class);
     // $Blogs = DB::table('blogs')->where('title', 'LIKE', '%'.$title.'%')->orderBy('id', 'desc')->Paginate(8);
     $blogs = Blog::with(['tags', 'comments', 'image', 'ratings', 'categories'])
       ->where('title', 'LIKE', '%' . $title . '%')
       ->orderBy('id', 'desc')
-      // ->get();
-      ->paginate();
-    // return $blogs;
+      ->paginate(4);
     return view('Blog/blog', compact(['blogs', 'title']));
   }
 
@@ -38,16 +33,7 @@ class BlogController extends Controller
 
   function create(CreateBlogRequest $request)
   {
-    // return $request->all();
-
     // DB::table('blogs')->insert([
-    //     'title' => $request->title,
-    //     'description' => $request->description,
-    //     'created_at' => now(),
-    //     'updated_at' => now(),
-    // ]);
-
-    // $Blogs = blog::create([
     //     'title' => $request->title,
     //     'description' => $request->description,
     //     'created_at' => now(),
@@ -81,7 +67,6 @@ class BlogController extends Controller
       'tags',
     ])->findOrFail($id);
 
-    // return $blog;
     return view('/Blog/blog-detail', compact('blog'));
   }
 
@@ -90,12 +75,6 @@ class BlogController extends Controller
     $blog = Blog::with('tags')->findOrFail($id);
     $tags = Tag::all();
 
-    // $response = Gate::inspect('manage-blog', $blog);
-
-    // if (!$response->allowed()) {
-    //   return abort(403, $response->message());
-    // }
-
     Gate::authorize('update', $blog);
 
     return view('/Blog/blog-edit', compact(['blog', 'tags']));
@@ -103,7 +82,6 @@ class BlogController extends Controller
 
   function update(UpdateBlogRequest $request, $id)
   {
-    // return $request->all();
     $validated = $request->validated();
 
     $blog = Blog::with('image')->findOrFail($id);
@@ -130,17 +108,6 @@ class BlogController extends Controller
       }
     }
 
-    // $blog = new blog;
-    // $blog->title = $request->title;
-    // $blog->description = $request->keterangan;
-    // $blog->save();
-
-    //  blog::create([
-    //         'title' => $request->title,
-    //         'description' => $request->keterangan,
-    //         'created_at' => now(),
-    //         'updated_at' => now(),
-    //  ]);
     $request->session()->put('status', 'Blog was successful updated!');
     return redirect()->route('/Blog/blog');
   }
@@ -150,15 +117,7 @@ class BlogController extends Controller
     // DB::table('blogs')->where('id', $id)-> delete();
 
     $blog = Blog::findOrFail($id);
-
-    // $response = Gate::inspect('manage-blog', $blog);
-
-    // if (!$response->allowed()) {
-    //   return abort(403, $response->message());
-    // }
-
     Gate::authorize('delete', $blog);
-
     $blog->delete();
 
     $request->session()->put('status', 'Blog was successful deleted!');

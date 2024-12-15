@@ -17,10 +17,6 @@ class RevalidateBackHistory
   {
     $response = $next($request);
 
-    // if (!$response instanceof Response) {
-    //   $response = new Response($response);
-    // }
-
     $response->headers->set(
       'Cache-Control',
       'no-cache, no-store, must-revalidate'

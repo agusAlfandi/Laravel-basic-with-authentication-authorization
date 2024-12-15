@@ -7,14 +7,12 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-  function store(Request $request, $blog_id)
+  function store(CommnetBlogRequest $request, $blog_id)
   {
-    $request->validate([
-      'comment_text' => 'required',
-    ]);
+    $validated = $request->validated();
 
     $request['blog_id'] = $request->blog_id;
-    Comment::create($request->all());
+    Comment::create($validated);
 
     $request->session()->flash('status', 'Comment was successful added!');
     return redirect()->route('blog-detail', $blog_id);
