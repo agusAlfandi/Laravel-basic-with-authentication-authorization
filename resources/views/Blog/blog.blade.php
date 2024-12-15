@@ -151,11 +151,6 @@
               </td>
               <td class="max-w-4xl">{{ $blog->description }}</td>
 
-              {{--
-                @if ()
-                @else
-                @endif
-              --}}
               <td class="w-auto flex justify-end gap-3">
                 <a
                   href="{{ url('/blog/' . $blog->id . '/detail') }}"
@@ -163,18 +158,23 @@
                 >
                   Detail
                 </a>
-                <a
-                  href="{{ url('/blog/' . $blog->id . '/edit') }}"
-                  class="btn btn-warning"
-                >
-                  Edit
-                </a>
-                <a
-                  href="{{ url('/blog/' . $blog->id . '/delete') }}"
-                  class="btn btn-error"
-                >
-                  Delete
-                </a>
+                @can('update', $blog)
+                  <a
+                    href="{{ url('/blog/' . $blog->id . '/edit') }}"
+                    class="btn btn-warning"
+                  >
+                    Edit
+                  </a>
+                @endcan
+
+                @can('delete', $blog)
+                  <a
+                    href="{{ url('/blog/' . $blog->id . '/delete') }}"
+                    class="btn btn-error"
+                  >
+                    Delete
+                  </a>
+                @endcan
               </td>
             </tr>
           @endforeach
