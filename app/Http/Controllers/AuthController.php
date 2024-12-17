@@ -24,8 +24,11 @@ class AuthController extends Controller
         $request->user()->update(['active' => 1]);
       }
 
-      return redirect('/blog');
+      return redirect('blog');
     }
+    return back()->withErrors([
+      'password' => 'The provided password is incorrect.',
+    ]);
   }
 
   public function logout(Request $request)
@@ -39,6 +42,6 @@ class AuthController extends Controller
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/login');
+    return redirect('login');
   }
 }

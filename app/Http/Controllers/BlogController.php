@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\CreateBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
 
@@ -33,19 +34,15 @@ class BlogController extends Controller
 
   function create(CreateBlogRequest $request)
   {
-    // DB::table('blogs')->insert([
-    //     'title' => $request->title,
-    //     'description' => $request->description,
-    //     'created_at' => now(),
-    //     'updated_at' => now(),
-    // ]);
-
     $validated = $request->validated();
+    $validated['author_id'] = $request->user()->id;
 
     $Blogs = Blog::create($validated);
     $Blogs->tags()->attach($request->tags);
-    $imageName = time() . '.' . $request->image->extension();
-    $request->image->move(public_path('images'), $imageName);
+
+    $imageName = $request->image->hashName();
+
+    Storage::putFileAs('images', $request->image, $imageName);
 
     Image::create([
       'name' => $imageName,
@@ -53,8 +50,8 @@ class BlogController extends Controller
       'imageable_type' => Blog::class,
     ]);
 
-    $request->session()->put('status', 'Blog was successful added!');
-    return redirect()->route('/Blog/blog');
+    session()->flash('status', 'Blog was successful added!');
+    return redirect()->route('blog');
   }
 
   function show($id)
@@ -108,11 +105,11 @@ class BlogController extends Controller
       }
     }
 
-    $request->session()->put('status', 'Blog was successful updated!');
+    session()->flash('status', 'Blog was successful updated!');
     return redirect()->route('/Blog/blog');
   }
 
-  function delete(Request $request, $id)
+  function delete($id)
   {
     // DB::table('blogs')->where('id', $id)-> delete();
 
@@ -120,8 +117,8 @@ class BlogController extends Controller
     Gate::authorize('delete', $blog);
     $blog->delete();
 
-    $request->session()->put('status', 'Blog was successful deleted!');
-    return redirect()->route('/Blog/blog');
+    session()->flash('status', 'Blog was successful deleted!');
+    return redirect()->route('blog');
   }
 
   function restore($id)

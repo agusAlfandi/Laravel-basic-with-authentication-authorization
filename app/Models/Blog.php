@@ -17,7 +17,7 @@ class Blog extends Model
 {
   use HasFactory;
 
-  protected $fillable = ['title', 'description'];
+  protected $fillable = ['title', 'description', 'author_id'];
 
   public function comments()
   {
