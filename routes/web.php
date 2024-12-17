@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\UserController;
@@ -13,7 +15,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'revalidate'])->group(function () {
-  Route::get('/blog', [BlogController::class, 'index'])->name('/blog');
+  Route::get('/blog', [BlogController::class, 'index'])->name('blog');
   Route::get('/blog/add', [BlogController::class, 'add'])->middleware('role');
   Route::post('/blog/create', [BlogController::class, 'create']);
   Route::get('/blog/{id}/detail', [BlogController::class, 'show'])->name(
