@@ -62,6 +62,7 @@ class BlogController extends Controller
         $query->orderBy('id', 'desc');
       },
       'tags',
+      'image',
     ])->findOrFail($id);
 
     return view('/Blog/blog-detail', compact('blog'));
@@ -89,8 +90,12 @@ class BlogController extends Controller
     $blog->tags()->sync($request->tags);
 
     if ($request->hasFile('image')) {
-      $imageName = time() . '.' . $request->image->extension();
-      $request->image->move(public_path('images'), $imageName);
+      if ($blog->image) {
+        Storage::delete('images/' . $blog->image->name);
+      }
+
+      $imageName = $request->image->hashName();
+      Storage::putFileAs('images', $request->image, $imageName);
 
       if ($blog->image) {
         $blog->image->update([
@@ -106,15 +111,18 @@ class BlogController extends Controller
     }
 
     session()->flash('status', 'Blog was successful updated!');
-    return redirect()->route('/Blog/blog');
+    return redirect()->route('blog');
   }
 
   function delete($id)
   {
     // DB::table('blogs')->where('id', $id)-> delete();
-
     $blog = Blog::findOrFail($id);
     Gate::authorize('delete', $blog);
+
+    if ($blog->image) {
+      Storage::delete('images/' . $blog->image->name);
+    }
     $blog->delete();
 
     session()->flash('status', 'Blog was successful deleted!');

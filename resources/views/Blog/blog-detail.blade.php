@@ -10,6 +10,13 @@
   <body>
     <div class="flex flex-col justify-center items-center m-5">
       <h1 class="text-4xl my-10">Blog Detail</h1>
+      <div>
+        <img
+          src="{{ asset('storage/images/' . $blog->image->name) }}"
+          class="w-25 h-20"
+          alt="Blog Image"
+        />
+      </div>
       <p>{{ $blog->title }}</p>
       <p class="text-justify">{{ $blog->description }}</p>
       <div class="divider"></div>
