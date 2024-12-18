@@ -104,7 +104,7 @@
               <td>
                 @if ($blog->image && $blog->id == $blog->image->imageable_id)
                   <img
-                    src="{{ env('URL_IMAGE') . $blog->image->name }}"
+                    src="{{ asset('storage/images/' . $blog->image->name) }}"
                     alt="logo"
                     class="w-25 h-20"
                   />
