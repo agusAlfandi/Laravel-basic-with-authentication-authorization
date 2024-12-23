@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\AuthUserRequest;
+use Illuminate\Auth\Events\Registered;
+use App\Http\Requests\RegistrationUser;
 
 class AuthController extends Controller
 {
@@ -24,7 +27,7 @@ class AuthController extends Controller
         $request->user()->update(['active' => 1]);
       }
 
-      return redirect('blog');
+      return redirect()->route('blog');
     }
     return back()->withErrors([
       'password' => 'The provided password is incorrect.',
@@ -42,6 +45,25 @@ class AuthController extends Controller
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('login');
+    return redirect()->route('login');
+  }
+
+  public function register()
+  {
+    return view('Auth/register');
+  }
+
+  public function createUser(RegistrationUser $request)
+  {
+    $validated = $request->validated();
+
+    $validated['password'] = bcrypt($validated['password']);
+    $user = User::create($validated);
+
+    Auth::login($user);
+
+    event(new Registered($user));
+
+    return redirect('/profile');
   }
 }
