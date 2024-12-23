@@ -11,12 +11,18 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
 use App\Jobs\ProsesTestMails;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
   return view('welcome');
 });
 
-Route::middleware(['auth', 'revalidate'])->group(function () {
+Route::get('/profile', function () {
+  return Auth::user()->name;
+})->middleware('verified');
+
+Route::middleware(['auth', 'revalidate', 'verified'])->group(function () {
   Route::get('/blog', [BlogController::class, 'index'])->name('blog');
   Route::get('/blog/add', [BlogController::class, 'add'])->middleware('role');
   Route::post('/blog/create', [BlogController::class, 'create']);
@@ -43,10 +49,37 @@ Route::middleware(['auth', 'revalidate'])->group(function () {
 Route::middleware(['guest', 'revalidate'])->group(function () {
   Route::get('/login', [AuthController::class, 'index'])->name('login');
   Route::post('/auth', [AuthController::class, 'auth']);
+  Route::get('/register', [AuthController::class, 'register']);
+  Route::post('/register', [AuthController::class, 'createUser']);
+});
+
+Route::middleware('auth')->group(function () {
+  Route::get('/email/verify', function () {
+    return view('Auth.verify-email');
+  })
+    ->middleware('auth')
+    ->name('verification.notice');
+
+  Route::get('/email/verify/{id}/{hash}', function (
+    EmailVerificationRequest $request
+  ) {
+    $request->fulfill();
+
+    return redirect('/profile');
+  })
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
+
+  Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Verification link sent!');
+  })
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
 });
 
 Route::get('/send-mail', function () {
-  // $data = ['name' => 'Jeffrey Way', 'password' => '123'];
   $data = [
     ['email' => 'user0@example.com', 'password' => '123'],
     ['email' => 'user1@example.com', 'password' => 'abc123'],
