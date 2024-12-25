@@ -11,20 +11,6 @@
     <div class="flex flex-col justify-center items-center h-screen">
       <h1 class="text-center text-4xl mb-10">Add New Blog</h1>
 
-      {{--
-        <div>
-        @if ($errors->any())
-        <div class="alert text-red-500 mb-4">
-        <ul>
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-        </ul>
-        </div>
-        @endif
-        </div>
-      --}}
-
       <form
         action="{{ url('/blog/create') }}"
         method="POST"
@@ -40,13 +26,9 @@
             name="title"
             value="{{ old('title') }}"
             placeholder="Tulis disini..."
+            required
           />
         </label>
-        @if ($errors->has('title'))
-          <div class="border rounded-lg p-5 bg-red-200 text-red-950">
-            {{ $errors->first('title') }}
-          </div>
-        @endif
 
         <textarea
           type="text"
@@ -56,15 +38,10 @@
           cols="50"
           rows="5"
           placeholder="Description"
+          required
         >
           {{ old('description') }}</textarea
         >
-
-        @if ($errors->has('description'))
-          <div class="border rounded-lg p-5 bg-red-200 text-red-950">
-            {{ $errors->first('description') }}
-          </div>
-        @endif
 
         <label class="flex w-full justify-start">Tags:</label>
 
@@ -83,24 +60,28 @@
           @endforeach
         </div>
 
-        {{-- @dump($tags) --}}
-
         <div class="flex flex-col gap-4 w-full">
           <label class="input input-bordered flex items-center gap-2">
             Image:
-            {{-- <input type="number" name="{{$}}" required hidden /> --}}
             <input type="file" name="image" required />
           </label>
-          @if ($errors->has('image'))
-            <div class="border rounded-lg p-5 bg-red-200 text-red-950">
-              {{ $errors->first('image') }}
-            </div>
-          @endif
         </div>
         <div class="w-full">
           <button class="btn btn-primary w-full">Submit</button>
         </div>
       </form>
+    </div>
+
+    <div class="mt-5">
+      @if ($errors->any())
+        <div class="p-5 rounded-md bg-red-300 text-red-950">
+          <ul>
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
     </div>
   </body>
 </html>

@@ -18,10 +18,6 @@ Route::get('/', function () {
   return view('welcome');
 });
 
-Route::get('/profile', function () {
-  return Auth::user()->name;
-})->middleware('verified');
-
 Route::middleware(['auth', 'revalidate', 'verified'])->group(function () {
   Route::get('/blog', [BlogController::class, 'index'])->name('blog');
   Route::get('/blog/add', [BlogController::class, 'add'])->middleware('role');
@@ -51,23 +47,36 @@ Route::middleware(['guest', 'revalidate'])->group(function () {
   Route::post('/auth', [AuthController::class, 'auth']);
   Route::get('/register', [AuthController::class, 'register']);
   Route::post('/register', [AuthController::class, 'createUser']);
+  Route::get('/forgot-password', function () {
+    return view('Auth.forgot-password');
+  })->name('password.request');
+  Route::post('/forgot-password', [
+    AuthController::class,
+    'forgotPassword',
+  ])->name('password.email');
+  Route::get('/reset-password/{token}', [
+    AuthController::class,
+    'resetPassword',
+  ])->name('password.reset');
+  Route::post('/reset-password/update', [
+    AuthController::class,
+    'updatePassword',
+  ])->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
   Route::get('/email/verify', function () {
     return view('Auth.verify-email');
-  })
-    ->middleware('auth')
-    ->name('verification.notice');
+  })->name('verification.notice');
 
   Route::get('/email/verify/{id}/{hash}', function (
     EmailVerificationRequest $request
   ) {
     $request->fulfill();
 
-    return redirect('/profile');
+    return redirect()->route('blog');
   })
-    ->middleware(['auth', 'signed'])
+    ->middleware('signed')
     ->name('verification.verify');
 
   Route::post('/email/verification-notification', function (Request $request) {
@@ -75,7 +84,7 @@ Route::middleware('auth')->group(function () {
 
     return back()->with('message', 'Verification link sent!');
   })
-    ->middleware(['auth', 'throttle:6,1'])
+    ->middleware('throttle:6,1')
     ->name('verification.send');
 });
 
