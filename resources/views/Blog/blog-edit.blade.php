@@ -28,11 +28,6 @@
             placeholder="Tulis disini..."
           />
         </label>
-        @if ($errors->has('title'))
-          <div class="border rounded-lg p-5 bg-red-200 text-red-950">
-            {{ $errors->first('title') }}
-          </div>
-        @endif
 
         <textarea
           type="text"
@@ -45,12 +40,6 @@
         >
           {{ $blog->description }}</textarea
         >
-
-        @if ($errors->has('description'))
-          <div class="border rounded-lg p-5 bg-red-200 text-red-950">
-            {{ $errors->first('description') }}
-          </div>
-        @endif
 
         <label class="flex w-full">Tags:</label>
 
@@ -75,17 +64,24 @@
             Image:
             <input type="file" name="image" required />
           </label>
-          @if ($errors->has('image'))
-            <div class="border rounded-lg p-5 bg-red-200 text-red-950">
-              {{ $errors->first('image') }}
-            </div>
-          @endif
         </div>
 
         <div class="w-full">
           <button class="btn btn-primary w-full">Submit</button>
         </div>
       </form>
+    </div>
+
+    <div class="mt-5">
+      @if ($errors->any())
+        <div class="p-5 rounded-md bg-red-300 text-red-950">
+          <ul>
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
     </div>
   </body>
 </html>

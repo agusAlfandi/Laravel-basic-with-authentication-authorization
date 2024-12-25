@@ -62,7 +62,6 @@
             <th>Title</th>
             <th>Tags</th>
             <th>Ratings</th>
-            {{-- <th>Comment</th> --}}
             <th>Category</th>
             <th>Description</th>
             <th>Action</th>
@@ -123,13 +122,6 @@
                 @endif
               </td>
 
-              {{--
-                <td>
-                @foreach ($article->comments as $comment)
-                <div>{{ $comment->comment_text }}</div>
-                @endforeach
-                </td>
-              --}}
               <td class="max-w-4xl">{{ $article->description }}</td>
               <td class="w-auto flex justify-end gap-3">
                 <a
