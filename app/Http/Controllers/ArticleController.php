@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
+use App\Repositories\Interfaces\ArticleRepositoryInterface;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
 {
+  public function __construct(protected ArticleRepositoryInterface $repository) {}
+
   public function index(Request $request)
   {
-    $title = $request->title;
-    $articles = Article::with(['ratings', 'tags', 'categories'])
-      ->where('title', 'LIKE', '%' . $title . '%')
-      //   ->orderBy('id', 'desc')
-      ->paginate();
-    // return $articles;
-    return view('Article/article', compact(['articles', 'title']));
+    $title = $request->input('title', '');
+    $articles = $this->repository->getAll($title);
+    return view('Article/article', compact('articles', 'title'));
   }
 }

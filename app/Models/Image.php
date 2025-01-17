@@ -13,8 +13,13 @@ class Image extends Model
   protected $fillable = ['name', 'imageable_id', 'imageable_type'];
   protected $guarded = 'id';
 
-  function imageable(): MorphTo
+  public function imageable(): MorphTo
   {
     return $this->morphTo();
+  }
+
+  public function article()
+  {
+    return $this->belongsTo(Article::class);
   }
 }

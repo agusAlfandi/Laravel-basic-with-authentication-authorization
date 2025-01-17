@@ -12,4 +12,9 @@ class Comment extends Model
   {
     return $this->belongsTo(Blog::class);
   }
+
+  function article()
+  {
+    return $this->belongsTo(Article::class);
+  }
 }

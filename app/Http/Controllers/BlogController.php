@@ -4,26 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Tag;
 use App\Models\Blog;
-use App\Models\Image;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\CreateBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
+use App\Repositories\Interfaces\BlogRepositoryInterface;
 
 class BlogController extends Controller
 {
+
+  public function __construct(protected BlogRepositoryInterface $repository) {}
+
   function index(Request $request)
   {
-    $title = $request->title;
-
-    Gate::authorize('viewAny', Blog::class);
-    // $Blogs = DB::table('blogs')->where('title', 'LIKE', '%'.$title.'%')->orderBy('id', 'desc')->Paginate(8);
-    $blogs = Blog::with(['tags', 'comments', 'image', 'ratings', 'categories'])
-      ->where('title', 'LIKE', '%' . $title . '%')
-      ->orderBy('id', 'desc')
-      ->paginate(4);
-    return view('Blog/blog', compact(['blogs', 'title']));
+    $title = $request->input('title', '');
+    $blogs = $this->repository->getAll($title);
+    return view('Blog.blog', compact('blogs', 'title'));
   }
 
   function add()
@@ -35,98 +30,29 @@ class BlogController extends Controller
   function create(CreateBlogRequest $request)
   {
     $validated = $request->validated();
-    $validated['author_id'] = $request->user()->id;
-
-    $Blogs = Blog::create($validated);
-    $Blogs->tags()->attach($request->tags);
-
-    $imageName = $request->image->hashName();
-
-    Storage::putFileAs('images', $request->image, $imageName);
-
-    Image::create([
-      'name' => $imageName,
-      'imageable_id' => $Blogs->id,
-      'imageable_type' => Blog::class,
-    ]);
-
-    session()->flash('status', 'Blog was successful added!');
-    return redirect()->route('blog');
+    return $this->repository->create($validated, $request);
   }
 
   function show($id)
   {
-    // $blog = DB::table('blogs')->where('id',$id)->first();
-    $blog = Blog::with([
-      'comments' => function ($query) {
-        $query->orderBy('id', 'desc');
-      },
-      'tags',
-      'image',
-    ])->findOrFail($id);
-
-    return view('/Blog/blog-detail', compact('blog'));
+    return $this->repository->show($id);
   }
 
   function edit(Request $request, $id)
   {
-    $blog = Blog::with('tags')->findOrFail($id);
-    $tags = Tag::all();
-
-    Gate::authorize('update', $blog);
-
-    return view('/Blog/blog-edit', compact(['blog', 'tags']));
+    $data = $this->repository->edit($request, $id);
+    return view('/Blog/blog-edit', $data);
   }
 
   function update(UpdateBlogRequest $request, $id)
   {
     $validated = $request->validated();
-
-    $blog = Blog::with('image')->findOrFail($id);
-
-    Gate::authorize('update', $blog);
-
-    $blog->update($validated);
-    $blog->tags()->sync($request->tags);
-
-    if ($request->hasFile('image')) {
-      if ($blog->image) {
-        Storage::delete('images/' . $blog->image->name);
-      }
-
-      $imageName = $request->image->hashName();
-      Storage::putFileAs('images', $request->image, $imageName);
-
-      if ($blog->image) {
-        $blog->image->update([
-          'name' => $imageName,
-        ]);
-      } else {
-        $blog->image()->create([
-          'name' => $imageName,
-          'imageable_id' => $blog->id,
-          'imageable_type' => Blog::class,
-        ]);
-      }
-    }
-
-    session()->flash('status', 'Blog was successful updated!');
-    return redirect()->route('blog');
+    return $this->repository->update($validated, $id, $request);
   }
 
   function delete($id)
   {
-    // DB::table('blogs')->where('id', $id)-> delete();
-    $blog = Blog::findOrFail($id);
-    Gate::authorize('delete', $blog);
-
-    if ($blog->image) {
-      Storage::delete('images/' . $blog->image->name);
-    }
-    $blog->delete();
-
-    session()->flash('status', 'Blog was successful deleted!');
-    return redirect()->route('blog');
+    return $this->repository->delete($id);
   }
 
   function restore($id)

@@ -12,7 +12,6 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
 use App\Jobs\ProsesTestMails;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
   return view('welcome');
@@ -103,10 +102,7 @@ Route::get('/send-mail', function () {
   ];
 
   foreach ($data as $user) {
-    //   Mail::to($user['email'])->send(new TestingMail($user));
-    //   sleep(1);
+
     ProsesTestMails::dispatch($user)->onQueue('send-email');
   }
-
-  // return 'Email sent successfully';
 });
